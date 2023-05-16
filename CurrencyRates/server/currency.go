@@ -26,7 +26,7 @@ func NewCurrency(log hclog.Logger, r *data.CurrencyRates) *Currency {
 }
 
 func (c *Currency) handleUpdates() {
-	updatesChannel := c.rates.MonitorRates(15 * time.Second)
+	updatesChannel := c.rates.MonitorRates(5 * time.Second)
 
 	for range updatesChannel {
 		c.log.Info("Rates updated")
@@ -45,6 +45,7 @@ func (c *Currency) handleUpdates() {
 						RateResponse: &protos.RateResponse{Base: rr.Base, Rate: r},
 					},
 				})
+
 				if err != nil {
 					c.log.Error("Unable to send updated rate", "base", rr.GetBase().String())
 				}
