@@ -10,6 +10,7 @@ import (
 	"github.com/ellofae/Financial-Market-Microservice/ClientSide/data"
 	"github.com/ellofae/Financial-Market-Microservice/ClientSide/handlers"
 	protos "github.com/ellofae/Financial-Market-Microservice/CurrencyRates/protos/currency"
+	"github.com/go-openapi/runtime/middleware"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-hclog"
@@ -38,9 +39,16 @@ func main() {
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
-	getRate := sm.Methods(http.MethodGet).Subrouter()
-	getRate.HandleFunc("/rate", pc.GetRate).Queries("currency", "{[A-Z]{3}}")
-	getRate.HandleFunc("/rate", pc.GetRate)
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/rate", pc.GetRate).Queries("currency", "{[A-Z]{3}}")
+	getRouter.HandleFunc("/rate", pc.GetRate)
+	getRouter.HandleFunc("/rates", pc.GetAllRates)
+
+	// swagger documentation handling
+	ops := middleware.RedocOpts{SpecURL: "swagger.yaml"}
+	sh := middleware.Redoc(ops, nil)
+	getRouter.Handle("/docs", sh)
+	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	// CORS
 	ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"*"})) // as an open-api

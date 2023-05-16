@@ -1,0 +1,79 @@
+basePath: /
+consumes:
+    - application/json
+definitions:
+    Currencies:
+        format: int32
+        type: integer
+        x-go-package: github.com/ellofae/Financial-Market-Microservice/CurrencyRates/protos/currency
+    Currency:
+        description: Currency defines the structure for an API currency object
+        properties:
+            base:
+                description: the currency title
+                type: string
+                x-go-name: Base
+            rate:
+                description: the currency rate
+                format: double
+                type: number
+                x-go-name: Rate
+        required:
+            - base
+            - rate
+        type: object
+        x-go-package: github.com/ellofae/Financial-Market-Microservice/ClientSide/data
+    CurrencyDB:
+        description: CurrencyDB defines the structure for the client/server communication and servers handlers with data
+        type: object
+        x-go-package: github.com/ellofae/Financial-Market-Microservice/ClientSide/data
+    RateResponse:
+        properties:
+            Base:
+                $ref: '#/definitions/Currencies'
+            Rate:
+                format: double
+                type: number
+        type: object
+        x-go-package: github.com/ellofae/Financial-Market-Microservice/CurrencyRates/protos/currency
+info:
+    description: '# Documentation for ClientSide API'
+    title: of ClientSide API
+    version: 1.0.0
+paths:
+    /rate:
+        get:
+            operationId: singleRate
+            parameters:
+                - in: query
+                  name: Currency
+                  type: string
+            responses:
+                "200":
+                    $ref: '#/responses/rateCorrectResponse'
+                "500":
+                    $ref: '#/responses/rateInternalErrorResponse'
+            summary: Returns the rate for the requested currency recieved from the API call
+    /rates:
+        get:
+            operationId: allRates
+            responses:
+                "200":
+                    $ref: '#/responses/rateCorrectResponse'
+                "500":
+                    $ref: '#/responses/rateInternalErrorResponse'
+            summary: Returns rates of the all available currencies' rates that can be requested and recieved from the API
+produces:
+    - application/json
+responses:
+    rateCorrectResponse:
+        description: RateCorrectResponse is a Correct response from the server to the client with status code 200
+        schema:
+            $ref: '#/definitions/RateResponse'
+    rateInternalErrorResponse:
+        description: RateInternalErrorResponse is an Internal Error with status code 500 returned when the server didn't manage to get requested currency's rate
+        schema:
+            $ref: '#/definitions/RateResponse'
+schemes:
+    - http
+swagger: "2.0"

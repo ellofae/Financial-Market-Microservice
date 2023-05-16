@@ -26,7 +26,7 @@ func NewCurrency(log hclog.Logger, r *data.CurrencyRates) *Currency {
 }
 
 func (c *Currency) handleUpdates() {
-	updatesChannel := c.rates.MonitorRates(5 * time.Second)
+	updatesChannel := c.rates.MonitorRates(30 * time.Second)
 
 	for range updatesChannel {
 		c.log.Info("Rates updated")

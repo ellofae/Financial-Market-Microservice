@@ -62,6 +62,7 @@ func (c *CurrencyRates) GetRates(currency string) (float64, error) {
 	rate, ok := c.rates[currency]
 	if !ok {
 		c.log.Error("Requested currency is not present in data the storage", "currency requested", currency)
+		fmt.Printf("TESTING: %#v\n\n", len(c.rates))
 		return -1, fmt.Errorf("no currency %s exists in the data storage", currency)
 	}
 
