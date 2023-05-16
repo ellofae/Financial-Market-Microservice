@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/ellofae/Financial-Market-Microservice/CurrencyRates/data"
@@ -12,40 +13,43 @@ import (
 )
 
 type Currency struct {
-	log   hclog.Logger
-	rates *data.CurrencyRates
+	log           hclog.Logger
+	rates         *data.CurrencyRates
+	subscriprions map[protos.Currency_StreamingRatesServer][]*protos.RateRequest
 }
 
 func NewCurrency(log hclog.Logger, r *data.CurrencyRates) *Currency {
-	c := &Currency{log: log, rates: r}
+	c := &Currency{log: log, rates: r, subscriprions: map[protos.Currency_StreamingRatesServer][]*protos.RateRequest{}}
 	go c.handleUpdates()
 
 	return c
 }
 
 func (c *Currency) handleUpdates() {
-	updatesChannel := c.rates.MonitorRates(5 * time.Second)
+	updatesChannel := c.rates.MonitorRates(15 * time.Second)
 
 	for range updatesChannel {
 		c.log.Info("Rates updated")
 
-		/*
-			var src protos.Currency_SubscribeRatesServer
+		for k, v := range c.subscriprions {
+			for _, rr := range v {
+				c.log.Info("Subscriber", "base:", rr.Base)
 
-			for k, v := range c.rates.ReturnRates() {
-				err := src.Send(
-					&protos.StreamingRateResponse{
-						Message: &protos.StreamingRateResponse_RateResponse{
-							RateResponse: &protos.RateResponse{Base: protos.Currencies(protos.Currencies_value[k]), Rate: v},
-						},
-					},
-				)
-
+				r, err := c.rates.GetRates(rr.Base.String())
 				if err != nil {
-					c.log.Error("Unable to send updated rates", "base", k)
+					c.log.Error("Unable to get update rate", "base", rr.GetBase().String())
+				}
+
+				err = k.Send(&protos.StreamingRateResponse{
+					Message: &protos.StreamingRateResponse_RateResponse{
+						RateResponse: &protos.RateResponse{Base: rr.Base, Rate: r},
+					},
+				})
+				if err != nil {
+					c.log.Error("Unable to send updated rate", "base", rr.GetBase().String())
 				}
 			}
-		*/
+		}
 	}
 }
 
@@ -89,64 +93,34 @@ func (c *Currency) GetRates(ctx context.Context, rr *protos.RateRequest) (*proto
 	return &protos.RateResponse{Base: protos.Currencies(protos.Currencies_value[rr.GetBase().String()]), Rate: rate}, nil
 }
 
-/*
+func (c *Currency) StreamingRates(src protos.Currency_StreamingRatesServer) error {
+	c.log.Info("Connection is up by the streaming method")
 
-func (c *Currency) SubscribeRates(src protos.Currency_SubscribeRatesServer) error {
-	// handle client messages
 	for {
-		rr, err := src.Recv()
+		resp, err := src.Recv() // Recv is a blocking method which returns on client data
 
 		// io.EOF signals that the client has closed the connection
 		if err == io.EOF {
-			c.log.Info("Client has closed connection")
+			c.log.Info("Client has closed the connection")
 			break
 		}
 
-		// transport between client and server is unavailable
+		// Unable to connect client and server
 		if err != nil {
 			c.log.Error("Unable to read from client", "error", err)
 			return err
 		}
 
-		c.log.Info("Handle client request", "request_base", rr.GetBase())
+		c.log.Info("Handle client request", "request_base", resp.GetBase())
 
-		rrs, ok := c.subscriptions[src]
+		rrs, ok := c.subscriprions[src]
 		if !ok {
 			rrs = []*protos.RateRequest{}
 		}
 
-		var validationError *status.Status
-		for _, request := range rrs {
-			if request.Base == rr.Base {
-				validationError = status.Newf(
-					codes.AlreadyExists,
-					"Unable to subscribe for currency as subscription already exists",
-				)
-
-				validationError, err = validationError.WithDetails(rr)
-				if err != nil {
-					c.log.Error("Unable to add metadata to error", "error", err)
-					break
-				}
-
-				break
-			}
-		}
-
-		if validationError != nil {
-			src.Send(&protos.StreamingRateResponse{
-				Message: &protos.StreamingRateResponse_Error{
-					Error: validationError.Proto(),
-				},
-			},
-			)
-			continue
-		}
-
-		rrs = append(rrs, rr)
-		c.subscriptions[src] = rrs
+		rrs = append(rrs, resp)
+		c.subscriprions[src] = rrs
 	}
 
 	return nil
 }
-*/
