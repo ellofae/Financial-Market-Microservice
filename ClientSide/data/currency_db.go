@@ -35,7 +35,7 @@ type CurrencyDB struct {
 	// recieved currency rates data storage
 	//
 	// required: true
-	rates map[string]float64
+	Rates map[string]float64
 
 	// CurrencyClient object required for making calls to the server
 	//
@@ -50,7 +50,7 @@ type CurrencyDB struct {
 
 // NewCurrencyDB created Currency object with specified logger and Client
 func NewCurrencyDB(l hclog.Logger, cc protos.CurrencyClient) *CurrencyDB {
-	c := &CurrencyDB{log: l, rates: make(map[string]float64), currency: cc}
+	c := &CurrencyDB{log: l, Rates: make(map[string]float64), currency: cc}
 
 	go c.processUpdates()
 
@@ -84,7 +84,7 @@ func (c *CurrencyDB) processUpdates() {
 				return
 			}
 
-			c.rates[resp.GetBase().String()] = resp.Rate
+			c.Rates[resp.GetBase().String()] = resp.Rate
 		}
 	}
 }

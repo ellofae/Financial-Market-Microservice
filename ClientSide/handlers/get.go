@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/ellofae/Financial-Market-Microservice/ClientSide/data"
 	protos "github.com/ellofae/Financial-Market-Microservice/CurrencyRates/protos/currency"
 )
 
@@ -49,13 +50,20 @@ func (c *Currencies) GetAllRates(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
 	c.log.Info("Requesting currencies' rates by client side")
 
+	var currencyObject *data.Currency
+	var err error
+
 	for currency_title, _ := range protos.Currencies_value {
 		base := currency_title
 
-		currencyObject, err := c.db.GetSingleRate(base)
-		if err != nil {
-			http.Error(rw, "Unable to get data from the server", http.StatusInternalServerError)
-			return
+		if r, ok := c.db.Rates[base]; !ok {
+			currencyObject, err = c.db.GetSingleRate(base)
+			if err != nil {
+				http.Error(rw, "Unable to get data from the server", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			currencyObject = &data.Currency{Base: base, Rate: r}
 		}
 
 		c.log.Info("Requsted data recieved", "currency requested", base, "response object", currencyObject)
