@@ -23,6 +23,7 @@ func (c *Currency) GetCurrencyRates(ctx context.Context, rr *protos.RatesRequest
 	return nil, nil
 }
 
+// every requests server's data gets updated by calling an api
 func (c *Currency) GetCurrencyRate(ctx context.Context, rr *protos.RatesRequest) (*protos.RatesResponse, error) {
 	c.log.Info("Requesting data from the server")
 

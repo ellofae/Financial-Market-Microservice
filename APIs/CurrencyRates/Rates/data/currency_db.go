@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -14,11 +15,18 @@ import (
 
 type CurrencyDB struct {
 	log   hclog.Logger
-	rates map[string]float64
+	rates map[string]*Rate
 }
 
 func NewCurrencyDB(log hclog.Logger) *CurrencyDB {
-	c := &CurrencyDB{log: log, rates: make(map[string]float64)}
+	c := &CurrencyDB{log: log, rates: make(map[string]*Rate)}
+	go func() {
+		err := c.getRates()
+		if err != nil {
+			log.Error("Unable to data for the server")
+			os.Exit(1)
+		}
+	}()
 
 	return c
 }
@@ -29,25 +37,34 @@ func (c *CurrencyDB) GetCurrencyRate(base string) (*protos.RatesResponse, error)
 		return nil, fmt.Errorf("currency's base is not supposed to be an empty string")
 	}
 
-	rateObj, err := c.getRate(base)
-	if err != nil {
-		c.log.Error("Unable to get rate for the requested currency", "currency", base)
-		return nil, fmt.Errorf("unable to get rate for the requested currency")
+	rateObj, ok := c.rates[base]
+	if !ok {
+		c.log.Error("There is no such currency rate in the database", "currency", base)
+		return nil, fmt.Errorf("no such currency rate in the database")
 	}
 
-	return rateObj, nil
+	rateObj.Rate = strings.Replace(rateObj.Rate, ",", ".", 1)
+	rate, err := strconv.ParseFloat(rateObj.Rate, 64)
+	if err != nil {
+		c.log.Error("Unable to convert string data type to float64 data type")
+		return nil, fmt.Errorf("unable to convert from string to float64")
+	}
+
+	respObj := &protos.RatesResponse{Base: protos.Currencies(protos.Currencies_value[rateObj.Base]), Rate: rate, NumCode: rateObj.NumCode, Title: rateObj.Name}
+
+	return respObj, nil
 }
 
-func (c *CurrencyDB) getRate(base string) (*protos.RatesResponse, error) {
+func (c *CurrencyDB) getRates() error {
 	resp, err := RecieveAPIsData()
 	if err != nil {
 		c.log.Error("Unable to get data from the API", "error", err)
-		return nil, err
+		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		c.log.Error("Recieved response's status code is not 200, unable to get rate from recieved body's response")
-		return nil, fmt.Errorf("recieved response's status code is not 200")
+		return fmt.Errorf("recieved response's status code is not 200")
 	}
 	defer resp.Body.Close()
 
@@ -55,30 +72,15 @@ func (c *CurrencyDB) getRate(base string) (*protos.RatesResponse, error) {
 	err = xml.NewDecoder(resp.Body).Decode(&rr)
 	if err != nil {
 		c.log.Error("Unable to decode XML data", "error", err)
-		return nil, err
+		return err
 	}
-
-	//fmt.Printf("data: %#v\n", rr.Rates)
-
-	var rateObj *protos.RatesResponse
-	var rate float64
 
 	for _, obj := range rr.Rates {
-		obj.Rate = strings.Replace(obj.Rate, ",", ".", 1)
-		rate, err = strconv.ParseFloat(obj.Rate, 64)
-		if err != nil {
-			fmt.Println("ERRORRRRR ", err)
-			return nil, err
-		}
-
-		c.rates[obj.Base] = rate
-
-		if obj.Base == base {
-			rateObj = &protos.RatesResponse{Base: protos.Currencies(protos.Currencies_value[obj.Base]), Title: obj.Name, NumCode: obj.NumCode, Rate: rate}
-		}
+		nobj := obj
+		c.rates[obj.Base] = &nobj
 	}
 
-	return rateObj, nil
+	return nil
 }
 
 func RecieveAPIsData() (*http.Response, error) {
