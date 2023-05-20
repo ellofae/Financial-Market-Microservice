@@ -5,7 +5,6 @@ option go_package = "./rates";
 //import "google/rpc/status.proto";
 
 service CurrencyRates {
-    rpc GetCurrencyRates(RatesRequest) returns (RatesResponse);
     rpc GetCurrencyRate(RatesRequest) returns (RatesResponse);
     //rpc StreamingCurrencyRate(stream RatesRequest) returns (StreamingRatesResponse);
 }

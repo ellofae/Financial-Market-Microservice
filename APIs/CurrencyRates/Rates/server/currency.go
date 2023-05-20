@@ -17,15 +17,9 @@ func NewCurrency(log hclog.Logger, rate_db *data.CurrencyDB) *Currency {
 	return &Currency{log: log, rateDB: rate_db}
 }
 
-func (c *Currency) GetCurrencyRates(ctx context.Context, rr *protos.RatesRequest) (*protos.RatesResponse, error) {
-	c.log.Info("Requesting data from the server")
-
-	return nil, nil
-}
-
 // every requests server's data gets updated by calling an api
 func (c *Currency) GetCurrencyRate(ctx context.Context, rr *protos.RatesRequest) (*protos.RatesResponse, error) {
-	c.log.Info("Requesting data from the server")
+	c.log.Info("Requesting data from the server", "currency", rr.Base)
 
 	requestedObject, err := c.rateDB.GetCurrencyRate(rr.GetBase().String())
 	if err != nil {

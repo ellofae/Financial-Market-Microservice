@@ -350,16 +350,12 @@ var file_cur_rates_proto_rawDesc = []byte{
 	0x5a, 0x4b, 0x10, 0x24, 0x12, 0x07, 0x0a, 0x03, 0x53, 0x45, 0x4b, 0x10, 0x25, 0x12, 0x07, 0x0a,
 	0x03, 0x43, 0x48, 0x46, 0x10, 0x26, 0x12, 0x07, 0x0a, 0x03, 0x52, 0x53, 0x44, 0x10, 0x27, 0x12,
 	0x07, 0x0a, 0x03, 0x5a, 0x41, 0x52, 0x10, 0x28, 0x12, 0x07, 0x0a, 0x03, 0x4b, 0x52, 0x57, 0x10,
-	0x29, 0x12, 0x07, 0x0a, 0x03, 0x4a, 0x50, 0x59, 0x10, 0x2a, 0x32, 0x74, 0x0a, 0x0d, 0x43, 0x75,
-	0x72, 0x72, 0x65, 0x6e, 0x63, 0x79, 0x52, 0x61, 0x74, 0x65, 0x73, 0x12, 0x31, 0x0a, 0x10, 0x47,
-	0x65, 0x74, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x63, 0x79, 0x52, 0x61, 0x74, 0x65, 0x73, 0x12,
-	0x0d, 0x2e, 0x52, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e,
-	0x2e, 0x52, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x30,
-	0x0a, 0x0f, 0x47, 0x65, 0x74, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x63, 0x79, 0x52, 0x61, 0x74,
-	0x65, 0x12, 0x0d, 0x2e, 0x52, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x0e, 0x2e, 0x52, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x42, 0x09, 0x5a, 0x07, 0x2e, 0x2f, 0x72, 0x61, 0x74, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x29, 0x12, 0x07, 0x0a, 0x03, 0x4a, 0x50, 0x59, 0x10, 0x2a, 0x32, 0x41, 0x0a, 0x0d, 0x43, 0x75,
+	0x72, 0x72, 0x65, 0x6e, 0x63, 0x79, 0x52, 0x61, 0x74, 0x65, 0x73, 0x12, 0x30, 0x0a, 0x0f, 0x47,
+	0x65, 0x74, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x63, 0x79, 0x52, 0x61, 0x74, 0x65, 0x12, 0x0d,
+	0x2e, 0x52, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e,
+	0x52, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x09, 0x5a,
+	0x07, 0x2e, 0x2f, 0x72, 0x61, 0x74, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -384,12 +380,10 @@ var file_cur_rates_proto_goTypes = []interface{}{
 var file_cur_rates_proto_depIdxs = []int32{
 	0, // 0: RatesRequest.Base:type_name -> Currencies
 	0, // 1: RatesResponse.Base:type_name -> Currencies
-	1, // 2: CurrencyRates.GetCurrencyRates:input_type -> RatesRequest
-	1, // 3: CurrencyRates.GetCurrencyRate:input_type -> RatesRequest
-	2, // 4: CurrencyRates.GetCurrencyRates:output_type -> RatesResponse
-	2, // 5: CurrencyRates.GetCurrencyRate:output_type -> RatesResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
+	1, // 2: CurrencyRates.GetCurrencyRate:input_type -> RatesRequest
+	2, // 3: CurrencyRates.GetCurrencyRate:output_type -> RatesResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -459,7 +453,6 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CurrencyRatesClient interface {
-	GetCurrencyRates(ctx context.Context, in *RatesRequest, opts ...grpc.CallOption) (*RatesResponse, error)
 	GetCurrencyRate(ctx context.Context, in *RatesRequest, opts ...grpc.CallOption) (*RatesResponse, error)
 }
 
@@ -469,15 +462,6 @@ type currencyRatesClient struct {
 
 func NewCurrencyRatesClient(cc grpc.ClientConnInterface) CurrencyRatesClient {
 	return &currencyRatesClient{cc}
-}
-
-func (c *currencyRatesClient) GetCurrencyRates(ctx context.Context, in *RatesRequest, opts ...grpc.CallOption) (*RatesResponse, error) {
-	out := new(RatesResponse)
-	err := c.cc.Invoke(ctx, "/CurrencyRates/GetCurrencyRates", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *currencyRatesClient) GetCurrencyRate(ctx context.Context, in *RatesRequest, opts ...grpc.CallOption) (*RatesResponse, error) {
@@ -491,7 +475,6 @@ func (c *currencyRatesClient) GetCurrencyRate(ctx context.Context, in *RatesRequ
 
 // CurrencyRatesServer is the server API for CurrencyRates service.
 type CurrencyRatesServer interface {
-	GetCurrencyRates(context.Context, *RatesRequest) (*RatesResponse, error)
 	GetCurrencyRate(context.Context, *RatesRequest) (*RatesResponse, error)
 }
 
@@ -499,33 +482,12 @@ type CurrencyRatesServer interface {
 type UnimplementedCurrencyRatesServer struct {
 }
 
-func (*UnimplementedCurrencyRatesServer) GetCurrencyRates(context.Context, *RatesRequest) (*RatesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCurrencyRates not implemented")
-}
 func (*UnimplementedCurrencyRatesServer) GetCurrencyRate(context.Context, *RatesRequest) (*RatesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCurrencyRate not implemented")
 }
 
 func RegisterCurrencyRatesServer(s *grpc.Server, srv CurrencyRatesServer) {
 	s.RegisterService(&_CurrencyRates_serviceDesc, srv)
-}
-
-func _CurrencyRates_GetCurrencyRates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RatesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CurrencyRatesServer).GetCurrencyRates(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/CurrencyRates/GetCurrencyRates",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CurrencyRatesServer).GetCurrencyRates(ctx, req.(*RatesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _CurrencyRates_GetCurrencyRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -550,10 +512,6 @@ var _CurrencyRates_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "CurrencyRates",
 	HandlerType: (*CurrencyRatesServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetCurrencyRates",
-			Handler:    _CurrencyRates_GetCurrencyRates_Handler,
-		},
 		{
 			MethodName: "GetCurrencyRate",
 			Handler:    _CurrencyRates_GetCurrencyRate_Handler,
