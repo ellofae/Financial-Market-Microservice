@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+option go_package = "./rates";
+
+//import "google/rpc/status.proto";
+
+service CurrencyRates {
+    rpc GetCurrencyRates(RatesRequest) returns (RatesResponse);
+    rpc GetCurrencyRate(RatesRequest) returns (RatesResponse);
+    //rpc StreamingCurrencyRate(stream RatesRequest) returns (StreamingRatesResponse);
+}
+
+message RatesRequest {
+    Currencies Base = 1;
+}
+
+message RatesResponse {
+    Currencies Base = 1;
+    string Title = 2;
+    int32 NumCode = 3;
+    double Rate = 4;
+}
+
+/*
+message StreamingRatesResponse {
+    oneof message {
+        RatesResponse rates_response = 1;
+        google.rpc.Status error = 2;
+    }
+}
+*/
+
+enum Currencies {
+    AUD= 0;
+    AZN= 1;
+    GBP= 2;
+    AMD= 3;
+    BYN= 4;
+    BGN= 5;
+    BRL= 6;
+    HUF= 7;
+    VND= 8;
+    HKD= 9;
+    GEL= 10;
+    DKK= 11;
+    AED= 12;
+    USD= 13;
+    EUR= 14;
+    EGP= 15;
+    INR= 16;
+    IDR= 17;
+    KZT= 18;
+    CAD= 19;
+    QAR= 20;
+    KGS= 21;
+    CNY= 22;
+    MDL= 23;
+    NZD= 24;
+    NOK= 25;
+    PLN= 26;
+    RON= 27;
+    XDR= 28;
+    SGD= 29;
+    TJS= 30;
+    THB= 31;
+    TRY= 32;
+    TMT= 33;
+    UZS= 34;
+    UAH= 35;
+    CZK= 36;
+    SEK= 37;
+    CHF= 38;
+    RSD= 39;
+    ZAR= 40;
+    KRW= 41;
+    JPY= 42;
+ }

@@ -20,8 +20,7 @@ func NewGetRouter(log hclog.Logger) *GetRouter {
 func (g *GetRouter) GetGreetingPage(c *fiber.Ctx) error {
 	g.log.Info("Sending greeting page to the client's request", "request's URL", c.Path)
 
-	// c.SendFile("./test.html")
-	c.Render("./test.html", fiber.Map{})
-
-	return nil
+	return c.Render("index", fiber.Map{
+		"Title": "Hello wrold",
+	})
 }
