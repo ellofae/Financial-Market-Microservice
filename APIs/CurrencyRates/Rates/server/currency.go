@@ -10,11 +10,11 @@ import (
 
 type Currency struct {
 	log    hclog.Logger
-	rateDB data.CurrencyDB
+	rateDB *data.CurrencyDB
 }
 
-func NewCurrency(log hclog.Logger) *Currency {
-	return &Currency{log: log}
+func NewCurrency(log hclog.Logger, rate_db *data.CurrencyDB) *Currency {
+	return &Currency{log: log, rateDB: rate_db}
 }
 
 func (c *Currency) GetCurrencyRates(ctx context.Context, rr *protos.RatesRequest) (*protos.RatesResponse, error) {

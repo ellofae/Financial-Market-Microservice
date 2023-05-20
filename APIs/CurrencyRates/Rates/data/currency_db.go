@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/hashicorp/go-hclog"
 
@@ -22,8 +24,6 @@ func NewCurrencyDB(log hclog.Logger) *CurrencyDB {
 }
 
 func (c *CurrencyDB) GetCurrencyRate(base string) (*protos.RatesResponse, error) {
-	c.log.Info("GetCurrencyRate processing")
-
 	if base == "" {
 		c.log.Error("Incorrect currency's base data", "currency base", base)
 		return nil, fmt.Errorf("currency's base is not supposed to be an empty string")
@@ -39,7 +39,6 @@ func (c *CurrencyDB) GetCurrencyRate(base string) (*protos.RatesResponse, error)
 }
 
 func (c *CurrencyDB) getRate(base string) (*protos.RatesResponse, error) {
-	c.log.Info("getRate processing")
 	resp, err := RecieveAPIsData()
 	if err != nil {
 		c.log.Error("Unable to get data from the API", "error", err)
@@ -53,30 +52,37 @@ func (c *CurrencyDB) getRate(base string) (*protos.RatesResponse, error) {
 	defer resp.Body.Close()
 
 	rr := &Rates{}
-	err = xml.NewDecoder(resp.Body).Decode(&rr.Rates)
+	err = xml.NewDecoder(resp.Body).Decode(&rr)
 	if err != nil {
 		c.log.Error("Unable to decode XML data", "error", err)
 		return nil, err
 	}
 
-	c.log.Info("TEST")
+	//fmt.Printf("data: %#v\n", rr.Rates)
 
 	var rateObj *protos.RatesResponse
+	var rate float64
+
 	for _, obj := range rr.Rates {
-		c.rates[obj.Base] = obj.Rate
+		obj.Rate = strings.Replace(obj.Rate, ",", ".", 1)
+		rate, err = strconv.ParseFloat(obj.Rate, 64)
+		if err != nil {
+			fmt.Println("ERRORRRRR ", err)
+			return nil, err
+		}
+
+		c.rates[obj.Base] = rate
 
 		if obj.Base == base {
-			rateObj = &protos.RatesResponse{Base: protos.Currencies(protos.Currencies_value[obj.Base]), Title: obj.Name, NumCode: obj.NumCode, Rate: obj.Rate}
+			rateObj = &protos.RatesResponse{Base: protos.Currencies(protos.Currencies_value[obj.Base]), Title: obj.Name, NumCode: obj.NumCode, Rate: rate}
 		}
 	}
-
-	c.rates["RUB"] = 1
 
 	return rateObj, nil
 }
 
 func RecieveAPIsData() (*http.Response, error) {
-	resp, err := http.DefaultClient.Get("https://www.cbr-xml-daily.ru/daily.xml")
+	resp, err := http.DefaultClient.Get("https://www.cbr-xml-daily.ru/daily_utf8.xml")
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +91,12 @@ func RecieveAPIsData() (*http.Response, error) {
 }
 
 type Rates struct {
-	Rates []Rate `xml:"ValCurs>Valute"`
+	Rates []Rate `xml:"Valute"`
 }
 
 type Rate struct {
-	Base    string  `xml:"CharCode,attr"`
-	Name    string  `xml:"Name,attr"`
-	NumCode int32   `xml:"NumCode,attr"`
-	Rate    float64 `xml:"Value,attr"`
+	Base    string `xml:"CharCode"`
+	Name    string `xml:"Name"`
+	NumCode string `xml:"NumCode"`
+	Rate    string `xml:"Value"`
 }

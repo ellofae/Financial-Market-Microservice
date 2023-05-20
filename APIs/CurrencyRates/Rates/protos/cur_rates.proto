@@ -17,7 +17,7 @@ message RatesRequest {
 message RatesResponse {
     Currencies Base = 1;
     string Title = 2;
-    int32 NumCode = 3;
+    string NumCode = 3;
     double Rate = 4;
 }
 

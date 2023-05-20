@@ -4,6 +4,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/ellofae/Financial-Market-Microservice/APIs/CurrencyRates/Rates/data"
 	"github.com/ellofae/Financial-Market-Microservice/APIs/CurrencyRates/Rates/server"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc"
@@ -16,8 +17,11 @@ func main() {
 	// setting logger
 	log := hclog.Default()
 
+	// setting CurrencyDB
+	db := data.NewCurrencyDB(log)
+
 	// setting CurrencyRatesServer object
-	cs := server.NewCurrency(log)
+	cs := server.NewCurrency(log, db)
 
 	// server configuration
 	grpcServer := grpc.NewServer()
