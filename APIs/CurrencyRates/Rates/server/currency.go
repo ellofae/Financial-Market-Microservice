@@ -6,6 +6,8 @@ import (
 	"github.com/ellofae/Financial-Market-Microservice/APIs/CurrencyRates/Rates/data"
 	protos "github.com/ellofae/Financial-Market-Microservice/APIs/CurrencyRates/Rates/protos/rates"
 	"github.com/hashicorp/go-hclog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Currency struct {
@@ -24,7 +26,19 @@ func (c *Currency) GetCurrencyRate(ctx context.Context, rr *protos.RatesRequest)
 	requestedObject, err := c.rateDB.GetCurrencyRate(rr.GetBase().String())
 	if err != nil {
 		c.log.Error("Unable to get rate from the server", "error", err)
-		return nil, err
+
+		grpcErr := status.Newf(
+			codes.Internal,
+			"Unable to get rate from the server, currency requested: %s",
+			rr.Base.String(),
+		)
+
+		grpcErr, wde := grpcErr.WithDetails(rr)
+		if wde != nil {
+			return nil, wde
+		}
+
+		return nil, grpcErr.Err()
 	}
 
 	return requestedObject, nil
