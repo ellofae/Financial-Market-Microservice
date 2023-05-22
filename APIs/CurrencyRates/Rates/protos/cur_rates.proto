@@ -2,11 +2,11 @@ syntax = "proto3";
 
 option go_package = "./rates";
 
-//import "google/rpc/status.proto";
+import "google/rpc/status.proto";
 
 service CurrencyRates {
     rpc GetCurrencyRate(RatesRequest) returns (RatesResponse);
-    //rpc StreamingCurrencyRate(stream RatesRequest) returns (StreamingRatesResponse);
+    rpc StreamingCurrencyRate(stream RatesRequest) returns (stream StreamingRatesResponse);
 }
 
 message RatesRequest {
@@ -20,14 +20,13 @@ message RatesResponse {
     double Rate = 4;
 }
 
-/*
+
 message StreamingRatesResponse {
     oneof message {
         RatesResponse rates_response = 1;
         google.rpc.Status error = 2;
     }
 }
-*/
 
 enum Currencies {
     AUD= 0;

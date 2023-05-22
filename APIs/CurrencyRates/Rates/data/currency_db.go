@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/go-hclog"
 
@@ -29,6 +30,29 @@ func NewCurrencyDB(log hclog.Logger) *CurrencyDB {
 	}()
 
 	return c
+}
+
+func (c *CurrencyDB) MonitorRates(timer time.Duration) chan struct{} {
+	ret := make(chan struct{})
+	var err error
+
+	go func() {
+		ticker := time.NewTicker(timer)
+
+		for {
+			select {
+			case <-ticker.C:
+				err = c.getRates()
+				if err != nil {
+					c.log.Error("Unable to update server's currency rates data")
+				}
+
+				ret <- struct{}{}
+			}
+		}
+	}()
+
+	return ret
 }
 
 func (c *CurrencyDB) GetCurrencyRate(base string) (*protos.RatesResponse, error) {
