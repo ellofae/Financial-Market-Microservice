@@ -19,7 +19,7 @@ type Currency struct {
 }
 
 func NewCurrency(log hclog.Logger, rate_db *data.CurrencyDB) *Currency {
-	c := &Currency{log: log, rateDB: rate_db}
+	c := &Currency{log: log, rateDB: rate_db, cache: make(map[protos.CurrencyRates_StreamingCurrencyRateServer][]*protos.RatesRequest)}
 	go c.handleUpdates()
 
 	return c

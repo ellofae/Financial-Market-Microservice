@@ -31,8 +31,8 @@ func main() {
 	reflection.Register(grpcServer)
 
 	// starting server on port 8000
-	log.Info("Starting the server", "host", "localhost", "port", 8000)
-	l, err := net.Listen("tcp", ":8000")
+	log.Info("Starting the server", "host", "localhost", "port", 9091)
+	l, err := net.Listen("tcp", ":9091")
 	if err != nil {
 		log.Error("Unable to listen", "error", err)
 		os.Exit(1)
