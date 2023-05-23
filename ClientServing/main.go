@@ -5,6 +5,7 @@ import (
 
 	"github.com/ellofae/Financial-Market-Microservice/ClientServing/handlers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/template/html"
 	"github.com/hashicorp/go-hclog"
 )
@@ -26,6 +27,13 @@ func main() {
 		WriteTimeout:  10 * time.Second,
 		AppName:       "ClientFinansialServing",
 	})
+
+	app.Use(cors.New())
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "https:/localhost:9091",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
 	// setting struct's with handlers methods
 	gr := handlers.NewGetRouter(log)
