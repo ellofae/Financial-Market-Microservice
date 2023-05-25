@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
+	"sync"
+	"time"
 
 	protos "github.com/ellofae/Financial-Market-Microservice/APIs/CurrencyRates/Rates/protos/rates"
 	"github.com/ellofae/Financial-Market-Microservice/ClientServing/data"
@@ -11,9 +14,13 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
-var CurrenciesAmountAvailable int = len(protos.Currencies_name)
-var continueQuerySupport int = 0
-var elementsToBeShown int = 0
+var (
+	CurrenciesAmountAvailable int = len(protos.Currencies_name)
+	continueQuerySupport      int = 0
+	elementsToBeShown         int = 0
+)
+
+var waitGroup sync.WaitGroup
 
 // GetRouter is a structure that registers all the http.MethodGet handlers
 type GetRouter struct {
@@ -30,9 +37,29 @@ func (g *GetRouter) GetGreetingPage(c *fiber.Ctx) error {
 	g.log.Info("Sending greeting page to the client's request", "request's URL", c.Path)
 
 	objs := []data.CurrencyObject{}
+	rates := []data.CurrencyRatesWithPercentage{}
+
+	waitGroup.Add(1)
+	go g.requestCurrencyExchangeRates(&objs)
+	waitGroup.Add(1)
+	go g.requestCurrencyRates(&rates)
+
+	waitGroup.Wait()
+	return c.Render("index", fiber.Map{
+		"Currencies": objs[:5],
+		"Rates":      rates,
+		"Year":       time.Now().Year(),
+	})
+
+	return nil
+}
+
+func (g GetRouter) requestCurrencyExchangeRates(objs *[]data.CurrencyObject) error {
+	g.log.Info("Requesting currency exchange rates")
+
 	obj := data.CurrencyObject{}
 
-	for amount := 0; amount < 5; amount++ {
+	for amount := 0; amount < CurrenciesAmountAvailable; amount++ {
 		base := protos.Currencies_name[int32(amount)]
 		resp, err := http.DefaultClient.Get(fmt.Sprintf("http://localhost:9092/rate?currency=%s", base))
 		if err != nil {
@@ -51,14 +78,43 @@ func (g *GetRouter) GetGreetingPage(c *fiber.Ctx) error {
 			g.log.Error("Unable to unmarhsall requested data")
 			return nil
 		}
-		objs = append(objs, obj)
+		*objs = append(*objs, obj)
+	}
+	waitGroup.Done()
+
+	return nil
+}
+
+func (g *GetRouter) requestCurrencyRates(rates *[]data.CurrencyRatesWithPercentage) error {
+	g.log.Info("Requesting currency rates")
+
+	ratesObject := data.CurrencyRates{}
+	tmp := data.CurrencyRatesWithPercentage{}
+	for amount := 0; amount < CurrenciesAmountAvailable; amount++ {
+		base := protos.Currencies_name[int32(amount)]
+		resp, err := http.DefaultClient.Get(fmt.Sprintf("http://localhost:9094/rate?currency=%s", base))
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			g.log.Error("Recieved response with status code not 200", "recieved status code", resp.StatusCode)
+		}
+		defer resp.Body.Close()
+		g.log.Info("Recieved response", "response", resp)
+
+		ratesObject = data.CurrencyRates{}
+		err = ratesObject.FromJSON(resp.Body)
+		if err != nil {
+			g.log.Error("Unable to unmarhsall requested data")
+			return nil
+		}
+		tmp = data.CurrencyRatesWithPercentage{Base: ratesObject.Base, Rate: ratesObject.Rate, Curr: math.Round((1/ratesObject.Rate)*100) / 100}
+		ratesObject.Rate = math.Round(ratesObject.Rate*100000) / 100000
+		*rates = append(*rates, tmp)
 	}
 
-	g.log.Info("Recieved data", "data", objs)
-
-	return c.Render("index", fiber.Map{
-		"Currencies": objs,
-	})
+	waitGroup.Done()
 
 	return nil
 }
@@ -78,7 +134,7 @@ func (g *GetRouter) ExchangePage(c *fiber.Ctx) error {
 		elementsToBeShown = elementsToBeShown + 4*(index-1)
 		continueQuerySupport = elementsToBeShown
 	} else {
-		continueQuery := c.Query("continue")
+		continueQuery := c.Query("next")
 		if continueQuery != "" {
 			elementsToBeShown = continueQuerySupport + 4
 			continueQuerySupport += 4
@@ -111,7 +167,7 @@ func (g *GetRouter) ExchangePage(c *fiber.Ctx) error {
 	objs := []data.CurrencyObject{}
 	obj := data.CurrencyObject{}
 
-	for amount := elementsToBeShown; amount < elementsToBeShown+4; amount++ {
+	for amount := elementsToBeShown; amount < elementsToBeShown+5; amount++ {
 		base := protos.Currencies_name[int32(amount)]
 		resp, err := http.DefaultClient.Get(fmt.Sprintf("http://localhost:9092/rate?currency=%s", base))
 		if err != nil {

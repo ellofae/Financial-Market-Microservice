@@ -35,12 +35,12 @@ func main() {
 	reflection.Register(gs)
 
 	// Specifing a port:
-	l, err := net.Listen("tcp", ":9090")
+	l, err := net.Listen("tcp", ":9093")
 	if err != nil {
 		log.Error("Unable to listen", "error", err)
 		os.Exit(1)
 	}
 
-	log.Info("Starting server on port :9090")
+	log.Info("Starting server on port :9093")
 	gs.Serve(l)
 }

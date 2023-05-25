@@ -21,7 +21,7 @@ func main() {
 	log := hclog.Default()
 
 	// Connection setting
-	conn, err := grpc.Dial(":9090", grpc.WithInsecure())
+	conn, err := grpc.Dial(":9093", grpc.WithInsecure())
 	if err != nil {
 		log.Error("Unable to extablish connection", "error", err)
 		os.Exit(1)
@@ -55,7 +55,7 @@ func main() {
 
 	// server establishing
 	srv := http.Server{
-		Addr:         ":9091",
+		Addr:         ":9094",
 		Handler:      ch(sm),
 		ErrorLog:     log.StandardLogger(&hclog.StandardLoggerOptions{}),
 		ReadTimeout:  5 * time.Second,
@@ -64,7 +64,7 @@ func main() {
 	}
 
 	go func() {
-		log.Info("Starting server on port :9091")
+		log.Info("Starting server on port :9094")
 
 		err := srv.ListenAndServe()
 		if err != nil {
