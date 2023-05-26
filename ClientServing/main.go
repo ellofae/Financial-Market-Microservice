@@ -42,6 +42,7 @@ func main() {
 	// setting http.MethodGet handlers
 	app.Get("/", gr.GetGreetingPage)
 	app.Get("/exchange", gr.ExchangePage)
+	app.Get("/about", gr.AboutPage)
 
 	// starting server on port 3000
 	log.Info("Starting the server", "host", "localhost", "port", 3000)

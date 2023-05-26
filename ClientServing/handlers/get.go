@@ -34,6 +34,8 @@ func NewGetRouter(log hclog.Logger) *GetRouter {
 
 // GetGreetingPage is a handler that provides the greeting page to the client
 func (g *GetRouter) GetGreetingPage(c *fiber.Ctx) error {
+	c.GetRespHeader("Content-Type")
+
 	g.log.Info("Sending greeting page to the client's request", "request's URL", c.Path)
 
 	objs := []data.CurrencyObject{}
@@ -70,7 +72,7 @@ func (g GetRouter) requestCurrencyExchangeRates(objs *[]data.CurrencyObject) err
 			g.log.Error("Recieved response with status code not 200", "recieved status code", resp.StatusCode)
 		}
 		defer resp.Body.Close()
-		g.log.Info("Recieved response", "response", resp)
+		//g.log.Info("Recieved response", "response", resp)
 
 		obj = data.CurrencyObject{}
 		err = obj.FromJSON(resp.Body)
@@ -101,7 +103,7 @@ func (g *GetRouter) requestCurrencyRates(rates *[]data.CurrencyRatesWithPercenta
 			g.log.Error("Recieved response with status code not 200", "recieved status code", resp.StatusCode)
 		}
 		defer resp.Body.Close()
-		g.log.Info("Recieved response", "response", resp)
+		//g.log.Info("Recieved response", "response", resp)
 
 		ratesObject = data.CurrencyRates{}
 		err = ratesObject.FromJSON(resp.Body)
@@ -120,7 +122,9 @@ func (g *GetRouter) requestCurrencyRates(rates *[]data.CurrencyRatesWithPercenta
 }
 
 func (g *GetRouter) ExchangePage(c *fiber.Ctx) error {
-	g.log.Info("Sending greeting page to the client's request", "request's URL", c.Path)
+	c.GetRespHeader("Content-Type")
+
+	g.log.Info("Sending page with currency exchange rates to the client's request", "request's URL", c.Path)
 
 	pageIndexQuery := c.Query("page")
 	if pageIndexQuery != "" && pageIndexQuery != "" {
@@ -162,12 +166,10 @@ func (g *GetRouter) ExchangePage(c *fiber.Ctx) error {
 		}
 	}
 
-	g.log.Info("Test", "elemtnsToBeShown", elementsToBeShown, "continuesQuerySupport", continueQuerySupport)
-
 	objs := []data.CurrencyObject{}
 	obj := data.CurrencyObject{}
 
-	for amount := elementsToBeShown; amount < elementsToBeShown+5; amount++ {
+	for amount := elementsToBeShown; amount < elementsToBeShown+10; amount++ {
 		base := protos.Currencies_name[int32(amount)]
 		resp, err := http.DefaultClient.Get(fmt.Sprintf("http://localhost:9092/rate?currency=%s", base))
 		if err != nil {
@@ -196,4 +198,12 @@ func (g *GetRouter) ExchangePage(c *fiber.Ctx) error {
 	})
 
 	return nil
+}
+
+func (g *GetRouter) AboutPage(c *fiber.Ctx) error {
+	c.GetRespHeader("Content-Type")
+
+	g.log.Info("Sending page with currency exchange rates to the client's request", "request's URL", c.Path)
+
+	return c.Render("about", fiber.Map{})
 }
