@@ -1,0 +1,49 @@
+basePath: /
+consumes:
+    - application/json
+definitions:
+    Record:
+        description: RecordData defines the wrapper structure
+        type: object
+        x-go-package: github.com/ellofae/Financial-Market-Microservice/APIs/HistoryRecord/handlers
+    RecordData:
+        description: RecordData defines the wrapper structure
+        properties:
+            RecordsObj:
+                additionalProperties: {}
+                description: recieved record data
+                type: object
+        required:
+            - RecordsObj
+        type: object
+        x-go-package: github.com/hashicorp/go-hclog
+info:
+    description: '# Documentation for ClientSide API'
+    title: of ClientSide API
+    version: 1.0.0
+paths:
+    /record:
+        get:
+            operationId: singleRate
+            responses:
+                "200":
+                    $ref: '#/responses/recordCurrectResponse'
+                "500":
+                    $ref: '#/responses/recordInternalErrorResponse'
+            summary: Returns the currency exchange rate record during some date interval
+produces:
+    - application/json
+responses:
+    recordCurrectResponse:
+        description: RecordCurrectResponse is a correct response from the server to the client with status code 200
+        schema:
+            additionalProperties: {}
+            type: object
+    recordInternalErrorResponse:
+        description: RecordInternalErrorResponse is an Internal Error with status code 500 returned when the server didn't manage to get requested currency's rate
+        schema:
+            additionalProperties: {}
+            type: object
+schemes:
+    - http
+swagger: "2.0"
