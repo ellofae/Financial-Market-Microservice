@@ -206,7 +206,7 @@ func (g *GetRouter) ExchangePage(c *fiber.Ctx) error {
 
 func (g *GetRouter) getExchangeRates(objs *[]data.CurrencyObject) error {
 	obj := data.CurrencyObject{}
-	for amount := elementsToBeShown; amount < elementsToBeShown+10; amount++ {
+	for amount := elementsToBeShown; amount < elementsToBeShown+12; amount++ {
 		base := protos.Currencies_name[int32(amount)]
 		resp, err := http.DefaultClient.Get(fmt.Sprintf("http://localhost:9092/rate?currency=%s", base))
 		if err != nil {
