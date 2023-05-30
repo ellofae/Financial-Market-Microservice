@@ -20,7 +20,6 @@ func main() {
 
 	sm := mux.NewRouter()
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/record/{symbols:[A-Z]{3}}", recordObject.GetCurrencyHistory).Queries("interval", "{([0-9]{4}-[0-9]{2}-[0-9]{2})_([0-9]{4}-[0-9]{2}-[0-9]{2})}")
 	getRouter.HandleFunc("/record/{symbols:[A-Z]{3}}", recordObject.GetCurrencyHistory)
 
 	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
@@ -37,7 +36,7 @@ func main() {
 		Handler:      ch(sm),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		WriteTimeout: 5 * time.Second,
 	}
 
 	go func() {

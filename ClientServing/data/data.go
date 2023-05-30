@@ -7,6 +7,11 @@ import (
 	"github.com/hashicorp/go-hclog"
 )
 
+type Records struct {
+	Date  string                 `json:"date"`
+	Rates map[string]interface{} `json:"rates"`
+}
+
 type CurrencyData struct {
 	log hclog.Logger
 }

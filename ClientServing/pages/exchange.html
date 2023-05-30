@@ -65,7 +65,7 @@
               
               <div class="list-group list-group-flush border-bottom scrollarea">
                 {{ range .ExchangeRates }}
-                <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+                <a href="/exchange?symbols={{.Base}}" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
                   <div class="d-flex w-100 align-items-center justify-content-between">
                     <strong class="mb-1">RUB/{{.Base}}</strong>
                     <small>{{.Rate}}</small>
@@ -173,27 +173,48 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      var array = []
+      
+      function getQuerystring(key) {
+                var query = window.location.search.substring(1);
+                //alert(query);
+                var vars = query.split("&");
+                for (var i = 0; i < vars.length; i++) {
+                    var pair = vars[i].split("=");
+                    if (pair[0] == key) {
+                        return pair[1];
+                    }
+                }
+      }  
+      const params = getQuerystring("symbols");
+      let currency = '';
 
-      const api_url = 'https://api.exchangerate.host/2020-04-04';
+      if (params == '') {
+        currency = 'AUD';
+      } else {
+        currency = params;
+      }
+      console.log(params);
+
+      const api_url = `http://localhost:9095/record/${currency}`;
       async function getData() {
         const response = await fetch(api_url);
-        const data = await response.json();
-        
-        
-      }
+        const apiData = await response.json();
 
-      getData()
+        let rates = apiData["Rates"];
 
+        let dates = apiData["Dates"];
+
+        console.log(rates)
+        console.log(dates)
 
         const ctx = document.getElementById('myChart');
         new Chart(ctx, {
           type: 'line',
           data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            labels: dates,
             datasets: [{
               label: 'Currency Exchange Rate',
-              data: [12, 19, 3, 5, 2, 3],
+              data: rates,
               borderWidth: 1
             }]
           },
@@ -205,6 +226,10 @@
             }
           }
         });
+      }
+      getData()
+
+        
 
     </script>
 

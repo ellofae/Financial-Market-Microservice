@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"regexp"
 
 	"github.com/ellofae/Financial-Market-Microservice/APIs/HistoryRecord/data"
 	"github.com/gorilla/mux"
@@ -22,27 +21,29 @@ func (r *Record) GetCurrencyHistory(rw http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 	symbols := vars["symbols"]
-	interval := req.URL.Query().Get("interval")
 
-	re := regexp.MustCompile("([0-9]{4}-[0-9]{2}-[0-9]{2})")
-	found := re.FindAllString(interval, -1)
-	if len(found) != 2 {
-		r.log.Error("incorrect interval was requested", "recieved data", found)
-	}
-
-	start_date := found[0]
-	end_date := found[1]
-
-	r.log.Info("Requesting historical record", "symbols", symbols, "start_date", start_date, "end_date", end_date)
-
-	err := r.records.GetCurrencyHistory(symbols, start_date, end_date)
+	err := r.records.GetCurrencyHistory(symbols)
 	if err != nil {
 		r.log.Error("Unable to get data from the API")
 		http.Error(rw, "Unable to get data from the API request", http.StatusInternalServerError)
 		return
 	}
 
-	err = data.ToJSON(rw, r.records.RecordsObj)
+	graphData := data.GraphFormatData{}
+
+	for _, record := range r.records.RecordsObj {
+		graphData.Dates = append(graphData.Dates, record.Date)
+		graphData.Rates = append(graphData.Rates, record.Rates[symbols].(float64))
+	}
+
+	/*
+		err = data.ToJSON(rw, r.records.RecordsObj)
+		if err != nil {
+			r.log.Error("Unable to marshall data to JSON format", "error", err)
+			http.Error(rw, "Unable to marshall data", http.StatusInternalServerError)
+		}
+	*/
+	err = graphData.ToJSON(rw)
 	if err != nil {
 		r.log.Error("Unable to marshall data to JSON format", "error", err)
 		http.Error(rw, "Unable to marshall data", http.StatusInternalServerError)

@@ -31,7 +31,7 @@ func main() {
 	app.Use(cors.New())
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "https:/localhost:9091",
+		AllowOrigins: "https:/localhost:9091, https:/localhost:9092, https:/localhost:9094, https:/localhost:9095",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
