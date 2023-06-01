@@ -35,7 +35,7 @@ func main() {
 		Addr:         ":9095",
 		Handler:      ch(sm),
 		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
+		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
 
