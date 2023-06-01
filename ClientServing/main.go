@@ -43,6 +43,8 @@ func main() {
 	app.Get("/", gr.GetGreetingPage)
 	app.Get("/exchange", gr.ExchangePage)
 	app.Get("/about", gr.AboutPage)
+	app.Get("/team", gr.TeamPage)
+	app.Get("/contact", gr.ContactPage)
 
 	// starting server on port 3000
 	log.Info("Starting the server", "host", "localhost", "port", 3000)
