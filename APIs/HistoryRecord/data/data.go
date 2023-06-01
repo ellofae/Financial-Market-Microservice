@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-hclog"
 )
 
 var signalChannel = make(chan bool) // signal channel
-//var waitGroup sync.WaitGroup
-//var aMutex sync.Mutex
+var waitGroup sync.WaitGroup
+var aMutex sync.Mutex
 
 // swagger:model
 type GraphFormatData struct {
@@ -60,6 +62,13 @@ func (r *RecordData) GetCurrencyHistory(symbols string) error {
 		return err
 	}
 
+	sort.Slice(r.RecordsObj, func(i, j int) bool {
+		date1, _ := time.Parse("2006-01-02", r.RecordsObj[i].Date)
+		date2, _ := time.Parse("2006-01-02", r.RecordsObj[j].Date)
+
+		return date1.Before(date2)
+	})
+
 	return nil
 }
 
@@ -76,10 +85,6 @@ func (r *RecordData) getRecords(ctx context.Context, symbols string) error {
 	case <-signalChannel:
 		fmt.Println("Signal caught!")
 
-		for i, j := 0, len(recordData)-1; i < j; i, j = i+1, j-1 {
-			recordData[i], recordData[j] = recordData[j], recordData[i]
-		}
-
 		r.RecordsObj = recordData
 
 		return nil
@@ -91,10 +96,12 @@ func (r *RecordData) getRecords(ctx context.Context, symbols string) error {
 
 func (r *RecordData) AppendData(recordsChannel <-chan Records, recordData *[]Records) {
 	for record := range recordsChannel {
-		*recordData = append(*recordData, record)
-	}
+		aMutex.Lock()
 
-	fmt.Println(*recordData)
+		*recordData = append(*recordData, record)
+
+		aMutex.Unlock()
+	}
 
 	signalChannel <- true
 }
@@ -103,34 +110,40 @@ func (r *RecordData) DataRequest(recordsChannel chan<- Records, symbols string, 
 	currentTime := time.Now()
 
 	for i := 1; i < 25; i++ {
-		record := Records{}
+		waitGroup.Add(1)
+		go func(currentTime time.Time) {
+			record := Records{}
 
-		resp, err := RecieveAPIsHistoryRecord(symbols, currentTime.Format("2006-01-02"))
-		if err != nil {
-			r.log.Error("Unable to get data from API", "error", err)
-			continue
-		}
+			resp, err := RecieveAPIsHistoryRecord(symbols, currentTime.Format("2006-01-02"))
+			if err != nil {
+				r.log.Error("Unable to get data from API", "error", err)
+				return
+			}
 
-		if resp.StatusCode != http.StatusOK {
-			r.log.Error("Recieved response's status code is not 200, unable to get rate from recieved body's response")
-			//return fmt.Errorf("recieved response's status code is not 200")
-			return
-		}
-		defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				r.log.Error("Recieved response's status code is not 200, unable to get rate from recieved body's response")
+				//return fmt.Errorf("recieved response's status code is not 200")
+				return
+			}
+			defer resp.Body.Close()
 
-		err = json.NewDecoder(resp.Body).Decode(&record)
-		if err != nil {
-			r.log.Error("Unable to unmarshall", "error", err)
-			//return err
-			return
-		}
+			err = json.NewDecoder(resp.Body).Decode(&record)
+			if err != nil {
+				r.log.Error("Unable to unmarshall", "error", err)
+				//return err
+				return
+			}
 
-		record.Rates[symbols] = 1.0 / record.Rates[symbols].(float64)
+			record.Rates[symbols] = 1.0 / record.Rates[symbols].(float64)
+			recordsChannel <- record
 
-		recordsChannel <- record
+			waitGroup.Done()
+		}(currentTime)
+
 		currentTime = currentTime.Add(-24 * time.Hour)
 	}
 
+	waitGroup.Wait()
 	close(recordsChannel)
 }
 
