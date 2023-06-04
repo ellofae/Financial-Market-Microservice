@@ -42,6 +42,7 @@ func main() {
 	// setting http.MethodGet handlers
 	app.Get("/", gr.GetGreetingPage)
 	app.Get("/exchange", gr.ExchangePage)
+	app.Get("/rates", gr.RatesPage)
 	app.Get("/about", gr.AboutPage)
 	app.Get("/team", gr.TeamPage)
 	app.Get("/contact", gr.ContactPage)
