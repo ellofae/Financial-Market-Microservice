@@ -3,12 +3,15 @@ package main
 import (
 	"time"
 
+	"github.com/ellofae/Financial-Market-Microservice/ClientServing/data"
 	"github.com/ellofae/Financial-Market-Microservice/ClientServing/handlers"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/template/html"
 	"github.com/hashicorp/go-hclog"
 )
+
+const DevAddress = "sergei.bykovskiy.edu@gmail.com"
 
 func main() {
 	// setting logger
@@ -37,6 +40,8 @@ func main() {
 
 	// setting struct's with handlers methods
 	gr := handlers.NewGetRouter(log)
+	msrv := data.NewMailService(log, []byte(DevAddress))
+	mailService := handlers.NewMailService(log, msrv)
 
 	// setting handlers for serving client's requests:
 	// setting http.MethodGet handlers
@@ -46,6 +51,9 @@ func main() {
 	app.Get("/about", gr.AboutPage)
 	app.Get("/team", gr.TeamPage)
 	app.Get("/contact", gr.ContactPage)
+
+	// setting http.MethodPost handlers
+	app.Post("/contact", mailService.MailServe)
 
 	// starting server on port 3000
 	log.Info("Starting the server", "host", "localhost", "port", 3000)
