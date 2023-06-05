@@ -30,11 +30,17 @@ ___________________________________
 ___________________________________
 
 ### Отобржанение главной страницы:
-
+![result1](https://github.com/ellofae/Financial-Market-Microservice/blob/main/imgs/pr1.PNG?raw=true)
 
 ### Отображение сервисной страницы Exchange Rates
-
+![result2](https://github.com/ellofae/Financial-Market-Microservice/blob/main/imgs/pr2.PNG?raw=true)
 
 ### Отображение сервисной страницы Currency Rates
+![result3](https://github.com/ellofae/Financial-Market-Microservice/blob/main/imgs/pr3.PNG?raw=true)
 
+### Отображение страницы Team
+![result4](https://github.com/ellofae/Financial-Market-Microservice/blob/main/imgs/pr4.PNG?raw=true)
+
+### Отображение страницы Contact
+![result5](https://github.com/ellofae/Financial-Market-Microservice/blob/main/imgs/pr5.PNG?raw=true)
 ___________________________________
