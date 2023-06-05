@@ -40,7 +40,7 @@
               <a class="dropdown-item" href="/exchange">Exchange rates</a>
               <a class="dropdown-item" href="/rates">Currency rates</a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="/team">Connect with team</a>
+              <a class="dropdown-item" href="/info">How data is recieved</a>
             </div>
           </li>
           <li class="nav-item">
@@ -93,7 +93,6 @@
           <div class="col-9" style="background-color: #fff;">
             <div class="container-fluid">
                 <canvas id="myChart3"></canvas>
-                
             </div>
           </div>
         </div>
@@ -204,29 +203,6 @@
 
         console.log(rates)
         console.log(dates)
-
-
-        const ctx2 = document.getElementById('myChart2');
-        new Chart(ctx2, {
-          type: 'line',
-          data: {
-            labels: dates,
-            datasets: [{
-              label: 'Currency Exchange Rate',
-              data: rates,
-              borderWidth: 1,
-              borderColor: 'rgb(75, 192, 192)',
-              tension: 0.4,
-            }]
-          },
-          options: {
-            scales: {
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
 
         for (i = 0; i < rates.length; i++) {
           rates[i] = 1 / rates[i]

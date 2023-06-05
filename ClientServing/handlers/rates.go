@@ -13,10 +13,10 @@ import (
 func (g *GetRouter) RatesPage(c *fiber.Ctx) error {
 	c.GetRespHeader("Content-Type")
 
-	g.log.Info("Sending page with currency rates to the client's request", "request's URL", c.Path)
+	g.log.Info("Sending page with currency exchange rates to the client's request", "request's URL", c.Path)
 
 	pageIndexQuery := c.Query("page")
-	if pageIndexQuery != "" {
+	if pageIndexQuery != "" && pageIndexQuery != "" {
 		index, err := strconv.Atoi(pageIndexQuery)
 		if err != nil {
 			g.log.Error("Unable to convert index query from strong to integer")
